@@ -8,6 +8,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   splitByRoute: false,
+  cloudflare: false, // Disable the automatic Cloudflare plugin
   tanstackStart: {
     deployment: {
       preset: "vercel",
