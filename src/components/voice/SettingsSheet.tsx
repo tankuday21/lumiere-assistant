@@ -22,7 +22,7 @@ import { ThemePicker } from "./ThemePicker";
 import type { AssistantSettings } from "@/hooks/useAssistant";
 
 export const LANGUAGES: { code: string; label: string }[] = [
-  { code: "unknown", label: "Auto-detect" },
+  { code: "auto", label: "Auto-detect (Bilingual)" },
   { code: "hi-IN", label: "हिन्दी (Hindi)" },
   { code: "en-IN", label: "English (India)" },
   { code: "bn-IN", label: "বাংলা (Bengali)" },
@@ -37,13 +37,13 @@ export const LANGUAGES: { code: string; label: string }[] = [
 ];
 
 export const SPEAKERS = [
-  "anushka",
-  "manisha",
-  "vidya",
-  "arya",
-  "abhilash",
-  "karun",
-  "hitesh",
+  { id: "anushka", label: "Anushka", persona: "Professional & Clear" },
+  { id: "manisha", label: "Manisha", persona: "Warm & Friendly" },
+  { id: "vidya", label: "Vidya", persona: "Calm & Natural" },
+  { id: "arya", label: "Arya", persona: "Energetic & Bright" },
+  { id: "abhilash", label: "Abhilash", persona: "Deep & Authoritative" },
+  { id: "karun", label: "Karun", persona: "Casual & Friendly" },
+  { id: "hitesh", label: "Hitesh", persona: "Trustworthy & Stable" },
 ];
 
 interface SettingsSheetProps {
@@ -150,7 +150,12 @@ export function SettingsSheet({ settings, onChange, onClear }: SettingsSheetProp
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {SPEAKERS.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                  <SelectItem key={s.id} value={s.id}>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-medium">{s.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{s.persona}</span>
+                    </div>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

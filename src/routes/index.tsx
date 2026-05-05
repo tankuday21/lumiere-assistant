@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Send } from "lucide-react";
-import { VoiceOrb } from "@/components/voice/VoiceOrb";
-import { Waveform } from "@/components/voice/Waveform";
+import { Plus, Send, Camera, History, Settings2, Trash2 } from "lucide-react";
+import { OrbVisualizer } from "@/components/voice/OrbVisualizer";
 import { MessageBubble } from "@/components/voice/MessageBubble";
 import { SettingsSheet } from "@/components/voice/SettingsSheet";
 import { HistorySheet } from "@/components/voice/HistorySheet";
 import { useAssistant, type AssistantSettings } from "@/hooks/useAssistant";
 import { useConversations } from "@/hooks/useConversations";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -23,27 +24,10 @@ const DEFAULT_SETTINGS: AssistantSettings = {
   webSearch: false,
 };
 
-const SUGGESTIONS: Record<string, string[]> = {
-  "hi-IN": [
-    "मुझे एक छोटी सी प्रेरक बात सुनाओ",
-    "आज की मौसम जैसी बातें",
-    "कोई दिलचस्प तथ्य बताओ",
-  ],
-  "en-IN": [
-    "Tell me a short motivating thought",
-    "Explain quantum computing simply",
-    "Give me a fun fact",
-  ],
-  default: [
-    "नमस्ते, अपना परिचय दो",
-    "Tell me something interesting",
-    "Recommend a good habit",
-  ],
-};
-
 function Index() {
   const [settings, setSettings] = useState<AssistantSettings>(DEFAULT_SETTINGS);
   const [textInput, setTextInput] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     try {
@@ -76,7 +60,6 @@ function Index() {
   const { conversations, activeId, setActiveId, upsert, newChat, remove } =
     useConversations();
 
-  // Persist messages whenever they change.
   useEffect(() => {
     if (messages.length > 0) upsert(messages);
   }, [messages, upsert]);
@@ -105,39 +88,17 @@ function Index() {
     }
   }, [status, isRecording, startRecording, stopAndProcess]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== "Space" || e.repeat) return;
-      const target = e.target as HTMLElement | null;
-      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
-      e.preventDefault();
-      handleToggle();
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && status === "speaking") interrupt();
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("keydown", onEsc);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("keydown", onEsc);
-    };
-  }, [handleToggle, status, interrupt]);
-
   const scrollerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    scrollerRef.current?.scrollTo({
-      top: scrollerRef.current.scrollHeight,
-      behavior: "smooth",
-    });
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTo({
+        top: scrollerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages]);
 
   const orbLevel = status === "speaking" ? outputLevel : inputLevel;
-
-  const suggestions = useMemo(
-    () => SUGGESTIONS[settings.language] ?? SUGGESTIONS.default,
-    [settings.language],
-  );
 
   const submitText = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,10 +107,43 @@ function Index() {
     setTextInput("");
   };
 
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target?.result as string;
+      toast.success("Image selected. Analyzing...");
+      // Send with a generic prompt if no text input, or with current text input
+      const prompt = textInput.trim() || "What is in this image?";
+      await sendText(prompt, base64);
+      setTextInput("");
+    };
+    reader.readAsDataURL(file);
+    // Reset file input
+    e.target.value = '';
+  };
+
   return (
-    <main className="min-h-screen flex flex-col">
-      <header className="flex items-center justify-between px-6 sm:px-10 py-6">
-        <div className="flex items-center gap-2">
+    <main className="h-screen flex flex-col overflow-hidden bg-background selection:bg-primary/20">
+      {/* Premium Gradient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/10 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <header className="flex items-center justify-between px-6 py-4 z-10 backdrop-blur-md bg-background/50 border-b border-border/50">
+        <div className="flex items-center gap-3">
           <HistorySheet
             conversations={conversations}
             activeId={activeId}
@@ -157,121 +151,127 @@ function Index() {
             onNew={handleNew}
             onDelete={remove}
           />
-          <div className="flex items-center gap-3 ml-1">
-            <span
-              className="h-3 w-3 rounded-full"
-              style={{ background: "var(--color-accent)" }}
-            />
-            <h1 className="font-display text-xl sm:text-2xl tracking-tight">Lumière</h1>
+          <div className="flex flex-col">
+            <h1 className="font-display text-lg tracking-tight font-bold">Lumière</h1>
+            <span className="text-[9px] uppercase tracking-[0.2em] opacity-50 font-mono">Vision Assistant</span>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={handleNew} aria-label="New chat">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={handleNew} className="hover:bg-primary/10">
             <Plus className="h-5 w-5" />
           </Button>
           <SettingsSheet settings={settings} onChange={setSettings} onClear={clear} />
         </div>
       </header>
 
-      <section className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-8 px-4 sm:px-6 pb-6">
-        {messages.length === 0 ? (
-          <div className="text-center max-w-xl space-y-3 sm:space-y-4">
-            <p
-              className="text-[10px] sm:text-xs tracking-[0.4em] uppercase font-mono"
-              style={{ color: "var(--color-muted-foreground)" }}
-            >
-              A voice-first studio
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl leading-[1.1]">
-              Speak in any Indic language. Hear it answer back.
-            </h2>
-            <p
-              className="text-sm sm:text-base md:text-lg leading-relaxed max-w-md mx-auto"
-              style={{ color: "var(--color-muted-foreground)" }}
-            >
-              Tap the orb, ask anything in your tongue, and a natural Sarvam voice replies — instantly.
-            </p>
-          </div>
-        ) : (
-          <div
-            ref={scrollerRef}
-            className="w-full max-w-3xl flex-1 max-h-[45vh] sm:max-h-[50vh] overflow-y-auto space-y-4 px-1"
-          >
-            {messages.map((m) => (
-              <MessageBubble key={m.id} message={m} onReplay={replayMessage} />
-            ))}
-          </div>
-        )}
-
-        <VoiceOrb status={status} level={orbLevel} onToggle={handleToggle} onInterrupt={interrupt} />
-
-        <Waveform level={inputLevel} active={isRecording} />
-
-        {messages.length === 0 && (
-          <div className="flex flex-wrap justify-center gap-2 max-w-xl">
-            {suggestions.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => sendText(s)}
-                disabled={status !== "idle"}
-                className="px-3.5 py-1.5 text-xs sm:text-sm rounded-full border transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  borderColor: "var(--color-border)",
-                  background: "color-mix(in oklab, var(--color-card) 60%, transparent)",
-                  color: "var(--color-foreground)",
-                  backdropFilter: "blur(6px)",
-                }}
+      <div className="flex-1 flex flex-col items-center justify-between p-6 overflow-hidden">
+        {/* Messages Section - Scrollable but contained */}
+        <div className="w-full max-w-2xl flex-1 overflow-hidden flex flex-col justify-end mb-4">
+          <AnimatePresence mode="popLayout">
+            {messages.length === 0 ? (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="text-center space-y-6 py-12"
               >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
+                <div className="space-y-2">
+                  <h2 className="font-display text-4xl sm:text-5xl font-bold bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
+                    How can I help?
+                  </h2>
+                  <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                    I can see, hear, and speak in your language. Tap the orb to begin.
+                  </p>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                ref={scrollerRef}
+                className="overflow-y-auto space-y-4 pr-2 custom-scrollbar"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                {messages.map((m) => (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, x: m.role === 'user' ? 20 : -20, y: 10 }}
+                    animate={{ opacity: 1, x: 0, y: 0 }}
+                    layout
+                  >
+                    <MessageBubble message={m} onReplay={replayMessage} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        <form
-          onSubmit={submitText}
-          className="w-full max-w-2xl flex items-center gap-2 px-1"
-        >
-          <input
-            type="text"
-            value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-            placeholder="…or type your message"
-            disabled={status !== "idle"}
-            className="flex-1 h-11 rounded-full px-5 text-sm border outline-none focus:ring-2 focus:ring-ring/40 disabled:opacity-50"
-            style={{
-              background: "color-mix(in oklab, var(--color-card) 70%, transparent)",
-              borderColor: "var(--color-border)",
-              color: "var(--color-foreground)",
-              backdropFilter: "blur(6px)",
-            }}
+        {/* Central Orb Section */}
+        <div className="relative flex flex-col items-center gap-4 py-4">
+          <OrbVisualizer
+            status={status}
+            level={orbLevel}
+            onToggle={handleToggle}
+            onInterrupt={interrupt}
           />
-          <button
-            type="submit"
-            disabled={!textInput.trim() || status !== "idle"}
-            className="h-11 w-11 rounded-full grid place-items-center disabled:opacity-40 transition-transform active:scale-95"
-            style={{
-              background: "var(--color-primary)",
-              color: "var(--color-primary-foreground)",
-            }}
-            aria-label="Send"
-          >
-            <Send className="h-4 w-4" />
-          </button>
-        </form>
+          
+          <AnimatePresence>
+            {status === "idle" && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+                className="text-[10px] uppercase tracking-[0.4em] font-mono"
+              >
+                Tap to speak
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
 
-        <p
-          className="text-[11px] sm:text-xs tracking-[0.3em] uppercase font-mono text-center"
-          style={{ color: "var(--color-muted-foreground)" }}
-        >
-          Tap orb · press
-          <kbd className="px-1.5 py-0.5 rounded border border-border mx-1.5 text-[10px] normal-case tracking-normal">Space</kbd>
-          to talk ·
-          <kbd className="px-1.5 py-0.5 rounded border border-border mx-1.5 text-[10px] normal-case tracking-normal">Esc</kbd>
-          to interrupt
-        </p>
-      </section>
+        {/* Input Bar Section */}
+        <div className="w-full max-w-2xl mt-auto">
+          <div className="flex items-center gap-2 p-2 rounded-full border border-border/50 bg-card/30 backdrop-blur-xl shadow-2xl">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full h-10 w-10 hover:bg-primary/10 shrink-0"
+              onClick={handleCameraClick}
+            >
+              <Camera className="h-5 w-5 text-muted-foreground" />
+            </Button>
+            
+            <form onSubmit={submitText} className="flex-1 flex items-center gap-2">
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Message Lumière..."
+                disabled={status !== "idle" && status !== "speaking"}
+                className="flex-1 bg-transparent border-none outline-none text-sm px-2 disabled:opacity-50"
+              />
+              <Button
+                type="submit"
+                disabled={!textInput.trim() || status === "thinking" || status === "transcribing"}
+                className="rounded-full h-10 w-10 p-0 shadow-lg active:scale-95 transition-transform"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+          <p className="text-[10px] text-center text-muted-foreground mt-4 font-mono opacity-30">
+            SECURE INDIC MULTIMODAL AI
+          </p>
+        </div>
+      </div>
     </main>
   );
 }

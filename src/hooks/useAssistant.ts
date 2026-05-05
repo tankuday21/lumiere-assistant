@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { blobToBase64, useRecorder } from "@/hooks/useRecorder";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 export interface ChatMessage {
   id: string;
@@ -190,7 +191,7 @@ export function useAssistant(settings: AssistantSettings) {
   );
 
   const streamReplyAndSpeak = useCallback(
-    async (history: ChatMessage[], assistantId: string) => {
+    async (history: ChatMessage[], assistantId: string, image?: string) => {
       let searchContext: string | undefined;
       if (settings.webSearch) {
         const lastUser = [...history].reverse().find((m) => m.role === "user");
@@ -226,6 +227,7 @@ export function useAssistant(settings: AssistantSettings) {
           messages: history.map((m) => ({ role: m.role, content: m.content })),
           language: settings.language,
           searchContext,
+          image,
         }),
       });
 
@@ -236,9 +238,13 @@ export function useAssistant(settings: AssistantSettings) {
         throw new Error("chat failed");
       }
 
-      const langCode = settings.language === "unknown" ? "hi-IN" : settings.language;
-      const tts = startTtsPipeline(langCode, settings.speaker);
+      const detectLanguage = (text: string) => {
+        if (settings.language !== "auto" && settings.language !== "unknown") return settings.language;
+        // Simple regex for Hindi/Devanagari characters
+        return /[\u0900-\u097F]/.test(text) ? "hi-IN" : "en-IN";
+      };
 
+      let tts: { enqueue: (text: string) => void; flush: () => Promise<void> } | null = null;
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -252,11 +258,20 @@ export function useAssistant(settings: AssistantSettings) {
         let m: RegExpExecArray | null;
         let lastIdx = 0;
         while ((m = re.exec(pending)) !== null) {
-          tts.enqueue(m[0]);
+          const sentence = m[0];
+          if (!tts) {
+            const langCode = detectLanguage(sentence);
+            tts = startTtsPipeline(langCode, settings.speaker);
+          }
+          tts.enqueue(sentence);
           lastIdx = m.index + m[0].length;
         }
         pending = pending.slice(lastIdx);
         if (final && pending.trim()) {
+          if (!tts) {
+            const langCode = detectLanguage(pending);
+            tts = startTtsPipeline(langCode, settings.speaker);
+          }
           tts.enqueue(pending);
           pending = "";
         }
@@ -305,7 +320,7 @@ export function useAssistant(settings: AssistantSettings) {
       setMessages((prev) =>
         prev.map((m) => (m.id === assistantId ? { ...m, pending: false } : m)),
       );
-      await tts.flush();
+      await tts?.flush();
       return full;
     },
     [settings.language, settings.speaker, settings.webSearch, startTtsPipeline],
@@ -324,16 +339,16 @@ export function useAssistant(settings: AssistantSettings) {
         },
       });
       // Haptic feedback on supported devices.
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        try { (navigator as Navigator).vibrate?.(8); } catch {}
-      }
+      try {
+        await Haptics.impact({ style: ImpactStyle.Medium });
+      } catch {}
     } catch {
       toast.error("Microphone permission denied.");
     }
   }, [recorder, stopAudio]);
 
   const processUserText = useCallback(
-    async (text: string) => {
+    async (text: string, image?: string) => {
       const userMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
@@ -349,8 +364,13 @@ export function useAssistant(settings: AssistantSettings) {
       const history = [...messages, userMsg];
       setMessages([...history, assistantMsg]);
       setStatus("thinking");
+
       try {
-        await streamReplyAndSpeak(history, assistantId);
+        await Haptics.impact({ style: ImpactStyle.Light });
+      } catch {}
+
+      try {
+        await streamReplyAndSpeak(history, assistantId, image);
       } finally {
         setStatus("idle");
         if (handsFreeRef.current) {
@@ -402,11 +422,11 @@ export function useAssistant(settings: AssistantSettings) {
   }, [stopAndProcess]);
 
   const sendText = useCallback(
-    async (text: string) => {
+    async (text: string, image?: string) => {
       const t = text.trim();
       if (!t || status !== "idle") return;
       stopAudio();
-      await processUserText(t);
+      await processUserText(t, image);
     },
     [status, stopAudio, processUserText],
   );
