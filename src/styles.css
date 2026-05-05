@@ -1,0 +1,300 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-orb-from: var(--orb-from);
+  --color-orb-to: var(--orb-to);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+/* ============================================================
+   IVORY EDITORIAL — default
+   ============================================================ */
+:root,
+[data-theme="ivory-editorial"] {
+  --radius: 1rem;
+
+  --background: oklch(0.957 0.027 85);
+  --foreground: oklch(0.215 0.04 40);
+  --card: oklch(0.985 0.018 85);
+  --card-foreground: oklch(0.215 0.04 40);
+  --popover: oklch(0.985 0.018 85);
+  --popover-foreground: oklch(0.215 0.04 40);
+  --primary: oklch(0.215 0.04 40);
+  --primary-foreground: oklch(0.957 0.027 85);
+  --secondary: oklch(0.92 0.03 85);
+  --secondary-foreground: oklch(0.215 0.04 40);
+  --muted: oklch(0.93 0.025 85);
+  --muted-foreground: oklch(0.45 0.04 50);
+  --accent: oklch(0.7 0.13 75);
+  --accent-foreground: oklch(0.18 0.04 40);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.86 0.025 80);
+  --input: oklch(0.86 0.025 80);
+  --ring: oklch(0.7 0.13 75);
+
+  --orb-from: oklch(0.78 0.13 75);
+  --orb-to: oklch(0.4 0.07 50);
+  --shadow-orb: 0 30px 80px -20px color-mix(in oklab, var(--accent) 50%, transparent);
+  --shadow-elegant: 0 20px 60px -25px color-mix(in oklab, var(--foreground) 35%, transparent);
+  --gradient-bg: radial-gradient(ellipse at top, color-mix(in oklab, var(--accent) 15%, var(--background)), var(--background) 60%);
+
+  --font-display: "Instrument Serif", "Times New Roman", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* ============================================================
+   SOFT MINIMAL
+   ============================================================ */
+[data-theme="soft-minimal"] {
+  --radius: 1.25rem;
+  --background: oklch(0.965 0.012 85);
+  --foreground: oklch(0.235 0.01 80);
+  --card: oklch(0.985 0.008 85);
+  --card-foreground: oklch(0.235 0.01 80);
+  --popover: oklch(0.985 0.008 85);
+  --popover-foreground: oklch(0.235 0.01 80);
+  --primary: oklch(0.235 0.01 80);
+  --primary-foreground: oklch(0.965 0.012 85);
+  --secondary: oklch(0.93 0.012 85);
+  --secondary-foreground: oklch(0.235 0.01 80);
+  --muted: oklch(0.93 0.012 85);
+  --muted-foreground: oklch(0.5 0.015 80);
+  --accent: oklch(0.7 0.06 145);
+  --accent-foreground: oklch(0.18 0.02 80);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.88 0.01 80);
+  --input: oklch(0.88 0.01 80);
+  --ring: oklch(0.7 0.06 145);
+
+  --orb-from: oklch(0.85 0.05 145);
+  --orb-to: oklch(0.5 0.04 145);
+  --shadow-orb: 0 30px 80px -20px color-mix(in oklab, var(--accent) 35%, transparent);
+  --shadow-elegant: 0 20px 60px -30px color-mix(in oklab, var(--foreground) 25%, transparent);
+  --gradient-bg: linear-gradient(180deg, var(--background), color-mix(in oklab, var(--accent) 6%, var(--background)));
+
+  --font-display: "Geist", "Inter", system-ui, sans-serif;
+  --font-body: "Geist", "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", monospace;
+}
+
+/* ============================================================
+   ART DECO BOUTIQUE
+   ============================================================ */
+[data-theme="art-deco"] {
+  --radius: 0.25rem;
+  --background: oklch(0.93 0.04 85);
+  --foreground: oklch(0.18 0.02 80);
+  --card: oklch(0.96 0.03 85);
+  --card-foreground: oklch(0.18 0.02 80);
+  --popover: oklch(0.96 0.03 85);
+  --popover-foreground: oklch(0.18 0.02 80);
+  --primary: oklch(0.38 0.09 165);
+  --primary-foreground: oklch(0.96 0.03 85);
+  --secondary: oklch(0.88 0.04 85);
+  --secondary-foreground: oklch(0.18 0.02 80);
+  --muted: oklch(0.88 0.04 85);
+  --muted-foreground: oklch(0.4 0.03 80);
+  --accent: oklch(0.65 0.12 75);
+  --accent-foreground: oklch(0.15 0.02 80);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.78 0.05 85);
+  --input: oklch(0.78 0.05 85);
+  --ring: oklch(0.38 0.09 165);
+
+  --orb-from: oklch(0.7 0.13 75);
+  --orb-to: oklch(0.38 0.09 165);
+  --shadow-orb: 0 30px 80px -15px color-mix(in oklab, var(--primary) 55%, transparent);
+  --shadow-elegant: 0 25px 60px -25px color-mix(in oklab, var(--primary) 40%, transparent);
+  --gradient-bg: radial-gradient(ellipse at top, color-mix(in oklab, var(--accent) 18%, var(--background)), var(--background) 65%);
+
+  --font-display: "Playfair Display", "Times New Roman", serif;
+  --font-body: "Cormorant Garamond", "Georgia", serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* ============================================================
+   BRUTALIST CREAM
+   ============================================================ */
+[data-theme="brutalist-cream"] {
+  --radius: 0rem;
+  --background: oklch(0.93 0.035 85);
+  --foreground: oklch(0.12 0.005 0);
+  --card: oklch(0.97 0.025 85);
+  --card-foreground: oklch(0.12 0.005 0);
+  --popover: oklch(0.97 0.025 85);
+  --popover-foreground: oklch(0.12 0.005 0);
+  --primary: oklch(0.12 0.005 0);
+  --primary-foreground: oklch(0.97 0.025 85);
+  --secondary: oklch(0.88 0.035 85);
+  --secondary-foreground: oklch(0.12 0.005 0);
+  --muted: oklch(0.88 0.035 85);
+  --muted-foreground: oklch(0.35 0.01 80);
+  --accent: oklch(0.7 0.22 45);
+  --accent-foreground: oklch(0.12 0.005 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.12 0.005 0);
+  --input: oklch(0.78 0.04 85);
+  --ring: oklch(0.7 0.22 45);
+
+  --orb-from: oklch(0.75 0.22 45);
+  --orb-to: oklch(0.12 0.005 0);
+  --shadow-orb: 8px 8px 0 0 var(--foreground);
+  --shadow-elegant: 6px 6px 0 0 var(--foreground);
+  --gradient-bg: var(--background);
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* ============================================================
+   RETRO-FUTURISTIC CREAM
+   ============================================================ */
+[data-theme="retro-futuristic"] {
+  --radius: 1.5rem;
+  --background: oklch(0.94 0.035 85);
+  --foreground: oklch(0.22 0.06 260);
+  --card: oklch(0.97 0.025 85);
+  --card-foreground: oklch(0.22 0.06 260);
+  --popover: oklch(0.97 0.025 85);
+  --popover-foreground: oklch(0.22 0.06 260);
+  --primary: oklch(0.22 0.06 260);
+  --primary-foreground: oklch(0.96 0.03 85);
+  --secondary: oklch(0.88 0.035 85);
+  --secondary-foreground: oklch(0.22 0.06 260);
+  --muted: oklch(0.88 0.035 85);
+  --muted-foreground: oklch(0.45 0.04 260);
+  --accent: oklch(0.72 0.17 30);
+  --accent-foreground: oklch(0.18 0.06 260);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.82 0.04 85);
+  --input: oklch(0.82 0.04 85);
+  --ring: oklch(0.72 0.17 30);
+
+  --orb-from: oklch(0.78 0.17 30);
+  --orb-to: oklch(0.32 0.1 260);
+  --shadow-orb: 0 0 80px color-mix(in oklab, var(--accent) 70%, transparent),
+                0 30px 60px -15px color-mix(in oklab, var(--primary) 40%, transparent);
+  --shadow-elegant: 0 0 40px color-mix(in oklab, var(--accent) 30%, transparent),
+                    0 20px 40px -20px color-mix(in oklab, var(--primary) 35%, transparent);
+  --gradient-bg: radial-gradient(ellipse at 30% 20%, color-mix(in oklab, var(--accent) 18%, var(--background)),
+                                  var(--background) 60%),
+                 radial-gradient(ellipse at 80% 90%, color-mix(in oklab, var(--primary) 15%, transparent),
+                                  transparent 60%);
+
+  --font-display: "Space Grotesk", "JetBrains Mono", monospace;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* ============================================================
+   ORGANIC ZEN
+   ============================================================ */
+[data-theme="organic-zen"] {
+  --radius: 2rem;
+  --background: oklch(0.945 0.03 85);
+  --foreground: oklch(0.22 0.02 60);
+  --card: oklch(0.975 0.022 85);
+  --card-foreground: oklch(0.22 0.02 60);
+  --popover: oklch(0.975 0.022 85);
+  --popover-foreground: oklch(0.22 0.02 60);
+  --primary: oklch(0.22 0.02 60);
+  --primary-foreground: oklch(0.96 0.03 85);
+  --secondary: oklch(0.9 0.03 85);
+  --secondary-foreground: oklch(0.22 0.02 60);
+  --muted: oklch(0.9 0.03 85);
+  --muted-foreground: oklch(0.45 0.025 60);
+  --accent: oklch(0.6 0.13 45);
+  --accent-foreground: oklch(0.97 0.02 85);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.84 0.025 85);
+  --input: oklch(0.84 0.025 85);
+  --ring: oklch(0.6 0.13 45);
+
+  --orb-from: oklch(0.78 0.12 45);
+  --orb-to: oklch(0.4 0.1 45);
+  --shadow-orb: 0 30px 80px -20px color-mix(in oklab, var(--accent) 50%, transparent);
+  --shadow-elegant: 0 20px 60px -25px color-mix(in oklab, var(--accent) 30%, transparent);
+  --gradient-bg: radial-gradient(60% 50% at 20% 30%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%),
+                 radial-gradient(50% 40% at 85% 80%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 70%),
+                 var(--background);
+
+  --font-display: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Cormorant Garamond", "Georgia", serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-body);
+  }
+
+  body {
+    background: var(--gradient-bg, var(--color-background));
+    background-attachment: fixed;
+    color: var(--color-foreground);
+    min-height: 100vh;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+.shadow-orb { box-shadow: var(--shadow-orb); }
+.shadow-elegant { box-shadow: var(--shadow-elegant); }
+
+.prose-bubble p { margin: 0 0 0.6em; }
+.prose-bubble p:last-child { margin-bottom: 0; }
+.prose-bubble code { font-family: var(--font-mono); background: color-mix(in oklab, var(--foreground) 8%, transparent); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+.prose-bubble pre { font-family: var(--font-mono); background: color-mix(in oklab, var(--foreground) 8%, transparent); padding: 0.8em; border-radius: 8px; overflow-x: auto; font-size: 0.85em; }
+.prose-bubble ul, .prose-bubble ol { padding-left: 1.4em; margin: 0.4em 0; }
+.prose-bubble strong { font-weight: 600; }
